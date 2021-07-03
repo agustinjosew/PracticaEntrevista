@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Servicios;
+using System;
 
 namespace ClienteConsola
 {
@@ -6,7 +7,8 @@ namespace ClienteConsola
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            TestServicio.TextConexion();
+            Console.Read();
         }
     }
 }
