@@ -350,4 +350,6 @@ MigrationBackup/
 .ionide/
 
 ParamsMaquinaLocal.cs
-
+*.sqldoc
+*.ssc
+*.xml
