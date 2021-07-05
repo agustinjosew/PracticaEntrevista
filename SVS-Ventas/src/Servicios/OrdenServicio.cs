@@ -44,7 +44,23 @@ namespace Servicios
 
         private void SeleccionarCliente( Factura factura, SqlConnection sqlConnection)
         {
-                
+            var comando = new SqlCommand("SELECT * FROM Clientes WHERE Id_Cliente=@Id_Cliente");
+            comando.Parameters.AddWithValue("@Id_cliente",factura.Id_Cliente);
+
+            var leer = comando.ExecuteReader();
+            leer.Read();
+
+            //var cliente = new Cliente {
+            //    Id     = Convert.ToInt32(leer["Id"]),
+            //    Nombre = leer["Nombre"].ToString(),
+            //};
+
+            //tambien puede quedar mejor con:
+            factura.Cliente = new Cliente
+            {
+                Id = Convert.ToInt32(leer["Id"]),
+                Nombre = leer["Nombre"].ToString()
+            };
         }
     }
 }
