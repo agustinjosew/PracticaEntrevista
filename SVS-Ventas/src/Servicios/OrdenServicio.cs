@@ -17,20 +17,22 @@ namespace Servicios
                 conexion.Open();
 
                 var comando = new SqlCommand("SELECT * FROM Facturas", conexion);
-                var leer    = comando.ExecuteReader();
-
-                while (leer.Read())
+                using (var leer = comando.ExecuteReader())
                 {
-                    var factura = new Factura
-                    {
-                        Id         = Convert.ToInt32(leer["Id"]),
-                        Id_Cliente = Convert.ToInt32(leer["Id_Cliente"]),
-                        Iva        = Convert.ToDecimal(leer["IVA"]),
-                        SubTotal   = Convert.ToDecimal(leer["SubTotal"]),
-                        Total      = Convert.ToDecimal(leer["Total"])
 
-                    };
-                    resultado.Add(factura);
+                    while (leer.Read())
+                    {
+                        var factura = new Factura
+                        {
+                            Id         = Convert.ToInt32(leer["Id"]),
+                            Id_Cliente = Convert.ToInt32(leer["Id_Cliente"]),
+                            Iva        = Convert.ToDecimal(leer["IVA"]),
+                            SubTotal   = Convert.ToDecimal(leer["SubTotal"]),
+                            Total      = Convert.ToDecimal(leer["Total"])
+
+                        };
+                        resultado.Add(factura);
+                    }
                 }
 
                 foreach (var factura in resultado)
@@ -47,20 +49,25 @@ namespace Servicios
             var comando = new SqlCommand("SELECT * FROM Clientes WHERE Id_Cliente=@Id_Cliente");
             comando.Parameters.AddWithValue("@Id_cliente",factura.Id_Cliente);
 
-            var leer = comando.ExecuteReader();
-            leer.Read();
-
-            //var cliente = new Cliente {
-            //    Id     = Convert.ToInt32(leer["Id"]),
-            //    Nombre = leer["Nombre"].ToString(),
-            //};
-
-            //tambien puede quedar mejor con:
-            factura.Cliente = new Cliente
+            using ( var leer = comando.ExecuteReader())                
             {
-                Id = Convert.ToInt32(leer["Id"]),
-                Nombre = leer["Nombre"].ToString()
-            };
+
+                leer.Read();
+
+                //var cliente = new Cliente {
+                //    Id     = Convert.ToInt32(leer["Id"]),
+                //    Nombre = leer["Nombre"].ToString(),
+                //};
+
+                //tambien puede quedar mejor con:
+                factura.Cliente = new Cliente
+                {
+                    Id = Convert.ToInt32(leer["Id"]),
+                    Nombre = leer["Nombre"].ToString()
+                };
+            }
+           
+            
         }
     }
 }
