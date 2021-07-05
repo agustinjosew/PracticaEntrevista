@@ -8,6 +8,9 @@ namespace ClienteConsola
         static void Main(string[] args)
         {
             TestServicio.TextConexion();
+
+            var ordenServicio = new OrdenServicio();
+            var resultado = ordenServicio.ObtenerTodo();
             Console.Read();
         }
     }
