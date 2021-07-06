@@ -41,6 +41,8 @@ namespace Servicios
                {
                    //props de cliente
                    SeleccionarCliente(factura, conexion);
+                   SeleccionarDetalleDeFactura(factura , conexion);
+
                }
             }
             return resultado;
@@ -82,7 +84,12 @@ namespace Servicios
                 {
                     factura.Detalle.Add(new FacturaDetalle 
                     { 
-                                            
+                         Id          = Convert.ToInt32(leer["Id"]),
+                         Id_Producto = Convert.ToInt32(leer["Id_Producto"]),
+                         Cantidad    = Convert.ToInt32(leer["Cantidad"]),
+                         IVA         = Convert.ToDecimal(leer["IVA"]),
+                         SubTotal    = Convert.ToDecimal(leer["SubTotal"]),
+                         Total       = Convert.ToDecimal(leer["Total"])
                     });
                 };
 
