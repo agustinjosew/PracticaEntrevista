@@ -25,11 +25,11 @@ namespace Servicios
                     {
                         var factura = new Factura
                         {
-                            Id = Convert.ToInt32(leer["Id"]),
+                            Id         = Convert.ToInt32(leer["Id"]),
                             Id_Cliente = Convert.ToInt32(leer["Id_Cliente"]),
-                            Iva = Convert.ToDecimal(leer["IVA"]),
-                            SubTotal = Convert.ToDecimal(leer["SubTotal"]),
-                            Total = Convert.ToDecimal(leer["Total"])
+                            Iva        = Convert.ToDecimal(leer["IVA"]),
+                            SubTotal   = Convert.ToDecimal(leer["SubTotal"]),
+                            Total      = Convert.ToDecimal(leer["Total"])
 
                         };
                         resultado.Add(factura);
@@ -64,11 +64,31 @@ namespace Servicios
                 //tambien puede quedar mejor con:
                 factura.Cliente = new Cliente
                 {
-                    Id      = Convert.ToInt32(leer["Id"]),
+                    Id     = Convert.ToInt32(leer["Id"]),
                     Nombre = leer["Nombre"].ToString()
                 };
             }           
             
+        }
+
+        private void SeleccionarDetalleDeFactura(Factura factura, SqlConnection conexion)
+        {
+            var comando = new SqlCommand("SELECT * FROM FacturasDetalle WHERE Id_Factura = @Id_Factura", conexion);
+            comando.Parameters.AddWithValue("@Id_Factura", factura.Id);
+
+            using (var leer = comando.ExecuteReader())
+            {
+                while (leer.Read())
+                {
+                    factura.Detalle.Add(new FacturaDetalle 
+                    { 
+                                            
+                    });
+                };
+
+                
+            }
+
         }
     }
 }
