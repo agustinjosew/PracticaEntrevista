@@ -353,3 +353,8 @@ ParamsMaquinaLocal.cs
 *.sqldoc
 *.ssc
 *.xml
+*.sqlgen
+*.txt
+*.csv
+*.sdvproj
+
