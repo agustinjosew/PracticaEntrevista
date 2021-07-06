@@ -8,7 +8,10 @@ using System.Text;
 namespace Servicios
 {
     public class OrdenServicio
-    {
+    {/// <summary>
+    /// Servicio general de interacciones con Facturaciones
+    /// </summary>
+    /// <returns></returns>
         public List<Factura> ObtenerTodo()
         {
             var resultado = new List<Factura>();
@@ -47,7 +50,11 @@ namespace Servicios
             }
             return resultado;
         }
-
+        /// <summary>
+        /// Obtener todos los datos asociados a la facturacion, como ser el detalle de Cliente mas el de las factiras asociadas a ese cliente.
+        /// </summary>
+        /// <param name="factura"></param>
+        /// <param name="conexion"></param>
         private void SeleccionarCliente( Factura factura, SqlConnection conexion)
         {            
             var comando = new SqlCommand("SELECT * FROM Clientes WHERE Id = @Id_Cliente", conexion);
@@ -72,7 +79,11 @@ namespace Servicios
             }           
             
         }
-
+        /// <summary>
+        /// Seleccionar Cliente para pasar a Lista General de Facturaciones
+        /// </summary>
+        /// <param name="factura"></param>
+        /// <param name="conexion"></param>
         private void SeleccionarDetalleDeFactura(Factura factura, SqlConnection conexion)
         {
             var comando = new SqlCommand("SELECT * FROM FacturasDetalle WHERE Id_Factura = @Id_Factura", conexion);
@@ -85,17 +96,47 @@ namespace Servicios
                     factura.Detalle.Add(new FacturaDetalle 
                     { 
                          Id          = Convert.ToInt32(leer["Id"]),
+                         Id_Factura  = Convert.ToInt32(leer["Id_Factura"]),
                          Id_Producto = Convert.ToInt32(leer["Id_Producto"]),
                          Cantidad    = Convert.ToInt32(leer["Cantidad"]),
                          IVA         = Convert.ToDecimal(leer["IVA"]),
                          SubTotal    = Convert.ToDecimal(leer["SubTotal"]),
-                         Total       = Convert.ToDecimal(leer["Total"])
+                         Total       = Convert.ToDecimal(leer["Total"]),
+                         //DC
+                         Factura     = factura,
+                         Precio      = Convert.ToDecimal(leer["Precio"]),
+                         
+                         
                     });
-                };
-
-                
+                }  
             }
+            foreach (var detalle in factura.Detalle)
+                {
+                    SeleccionarProducto(detalle , conexion);
+                }
 
         }
+        /// <summary>
+        /// Seleccionar Producto para pasar a Detalle de factura
+        /// </summary>
+        /// <param name="detalle"></param>
+        /// <param name="conexion"></param>
+        private void SeleccionarProducto ( FacturaDetalle detalle , SqlConnection conexion )
+            {
+            var comando = new SqlCommand("SELECT * FROM Productos WHERE Id = @Id_producto", conexion);
+            comando.Parameters.AddWithValue("@Id_producto" , detalle.Id_Producto);
+
+            using ( var leer = comando.ExecuteReader() )
+                {
+                leer.Read();
+                detalle.Producto = new Producto
+                    {
+                    Id     = Convert.ToInt32(leer["Id"]) ,
+                    Nombre = leer["Nombre"].ToString() ,
+                    Precio = Convert.ToInt32(leer["Precio"])
+                    };
+                }
+            }
     }
 }
+
