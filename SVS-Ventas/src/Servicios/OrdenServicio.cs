@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Transactions;
 
 namespace Servicios
 {
@@ -90,11 +91,19 @@ namespace Servicios
         {
             PrepararOrden(modeloDeFactura);
 
-            using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
-                conexion.Open();
+            using(var transaccion = new TransactionScope()) {
+                //https://docs.microsoft.com/en-us/dotnet/api/system.transactions.transactionscope.complete?view=net-5.0
 
-                AgregarCabeceraFactura(modeloDeFactura ,conexion);
-                AgregarDetalleFactura(modeloDeFactura ,conexion);
+                using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+
+                    conexion.Open();
+
+                    AgregarCabeceraFactura(modeloDeFactura ,conexion);
+                    AgregarDetalleFactura(modeloDeFactura ,conexion);
+                }
+
+                transaccion.Complete();
+
             }
         }
         private void AgregarCabeceraFactura(Factura modeloDeFactura ,SqlConnection conexion)
@@ -142,12 +151,22 @@ namespace Servicios
         {
             PrepararOrden(modeloDeFactura);
 
-            using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
-                conexion.Open();
+            using(var transaccion = new TransactionScope()) {
 
-                ActualizarCabeceraFactura(modeloDeFactura ,conexion);
-                EliminarDetalleFactura(modeloDeFactura.Id ,conexion);
+                using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+
+                    conexion.Open();
+
+                    ActualizarCabeceraFactura(modeloDeFactura ,conexion);
+                    
+                    EliminarDetalleFactura(modeloDeFactura.Id ,conexion);
+
+                    AgregarDetalleFactura(modeloDeFactura,conexion);
+                }
+                transaccion.Complete();
             }
+
+            
         }
         private void ActualizarCabeceraFactura(Factura modeloDeFactura ,SqlConnection conexion)
         {
@@ -193,7 +212,7 @@ namespace Servicios
 
             }
         }
-
+         
 
 
         private void PrepararOrden(Factura modeloDeFactura)
