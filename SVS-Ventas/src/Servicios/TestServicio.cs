@@ -1,11 +1,10 @@
 ﻿using Comun;
 using System;
-
-
 using System.Data.SqlClient;
+using Modelos;
+using System.Collections.Generic;
 
-namespace Servicios
-{
+namespace Servicios {
     public class TestServicio
     {
         public static void TextConexion()
@@ -29,6 +28,28 @@ namespace Servicios
             
             
             
+        }
+
+        public static void CrearOrdenesDemo()
+        {
+            var orden = new Factura{
+
+                Id_Cliente = 2,
+                Detalle    = new List<FacturaDetalle>{
+
+                    new FacturaDetalle{
+                        Id_Producto = 5,
+                        Precio      = 917.33m,
+                        Cantidad    = 10
+                    },
+                    new FacturaDetalle{
+                        Id_Producto = 10,
+                        Precio      = 8182.87m,
+                        Cantidad    = 10
+                    }
+                }
+            };
+
         }
 
     }
