@@ -16,6 +16,5 @@ namespace Modelos
         public decimal  Total       { get; set; }
         public Factura  Factura     { get; set; }
         public Producto Producto    { get; set; }
-
         }
     }
