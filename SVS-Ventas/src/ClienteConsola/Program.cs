@@ -10,7 +10,8 @@ namespace ClienteConsola
             TestServicio.TextConexion();
 
             var ordenServicio = new OrdenServicio();
-            var resultado = ordenServicio.ObtenerTodo();    
+            //var resultado = ordenServicio.ObtenerTodo();    
+            //var resultado = ordenServicio.Obtener(78);
             Console.Read();
         }
     }
