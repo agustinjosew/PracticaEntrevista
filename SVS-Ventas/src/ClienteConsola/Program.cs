@@ -12,6 +12,7 @@ namespace ClienteConsola
             TestServicio.TextConexion();
 
             var ordenServicio = new OrdenServicio();
+            #region codigosPrueba
             //var resultado = ordenServicio.ObtenerTodo();    
             //var resultado = ordenServicio.Obtener(78);
             //var orden = new Factura{
@@ -55,6 +56,9 @@ namespace ClienteConsola
             //ordenServicio.Actualizar(orden);
 
             //ordenServicio.Eliminar(4);
+            #endregion
+
+            //Implementacion de Unit of work
             Console.Read();
         }
     }
