@@ -181,7 +181,18 @@ namespace Servicios
 
         }
 
+        public void Eliminar(int Id)
+        {
+            using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+                conexion.Open();
 
+                var comando = new SqlCommand("DELETE FROM Facturas WHERE Id = @Id", conexion);
+                comando.Parameters.AddWithValue("@Id" ,Id);
+                comando.ExecuteNonQuery();
+
+
+            }
+        }
 
 
 

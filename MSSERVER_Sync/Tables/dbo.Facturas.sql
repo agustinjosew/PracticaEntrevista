@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[Facturas]
 (
 [Id] [int] NOT NULL IDENTITY(1, 1),
 [Id_Cliente] [int] NOT NULL,
-[IVA] [int] NOT NULL,
+[IVA] [decimal] (18, 2) NOT NULL,
 [SubTotal] [decimal] (18, 2) NOT NULL,
 [Total] [decimal] (18, 2) NOT NULL
 ) ON [PRIMARY]
