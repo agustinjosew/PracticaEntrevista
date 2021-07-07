@@ -52,8 +52,47 @@ namespace Servicios
             }
             return resultado;
         }
+
         /// <summary>
-        /// Obtener todos los datos asociados a la facturacion, como ser el detalle de Cliente mas el de las factiras asociadas a ese cliente.
+        /// Obtener por el ID los datos de la factura.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Factura Obtener(int id)
+        {
+            var resultado = new Factura();
+            try {
+                using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+                    conexion.Open();
+
+                    var comando = new SqlCommand("SELECT * FROM Facturas WHERE Id = @Id", conexion);
+                    comando.Parameters.AddWithValue("@Id" ,id);
+
+                    using(var leer = comando.ExecuteReader()) {
+
+                        leer.Read();
+
+                        resultado.Id         = Convert.ToInt32(leer["Id"]);
+                        resultado.Id_Cliente = Convert.ToInt32(leer["Id_Cliente"]);
+                        resultado.Iva        = Convert.ToDecimal(leer["IVA"]);
+                        resultado.SubTotal   = Convert.ToDecimal(leer["SubTotal"]);
+                        resultado.Total      = Convert.ToDecimal(leer["Total"]);
+                    }
+
+                    SeleccionarCliente(resultado ,conexion);
+                    SeleccionarDetalleDeFactura(resultado ,conexion);
+                }
+
+            }
+            catch(Exception) { Console.WriteLine("No se ha encontrado ese registo"); }
+
+            return resultado;
+
+
+        }
+
+        /// <summary>
+        /// Obtener todos los datos asociados a la facturacion, como ser el detalle de Cliente mas el de las facturas asociadas a ese cliente.
         /// </summary>
         /// <param name="factura"></param>
         /// <param name="conexion"></param>
