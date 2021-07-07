@@ -3,17 +3,14 @@ using Modelos;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
 
 namespace Servicios
 {
     public class OrdenServicio
 
-    {/// <summary>
-    /// Servicio general de interacciones con Facturaciones
-    /// </summary>
-    /// <returns></returns>
-
+    {
         public List<Factura> ObtenerTodo()
         {
             var resultado = new List<Factura>();
@@ -49,18 +46,166 @@ namespace Servicios
 
                    SeleccionarDetalleDeFactura(factura , conexion);
 
-
-
                }
             }
             return resultado;
         }
+        
+        public Factura Obtener(int id)
+        {
+            var resultado = new Factura();
+            try {
+                using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+                    conexion.Open();
 
-        /// <summary>
-        /// Obtener todos los datos asociados a la facturacion, como ser el detalle de Cliente mas el de las factiras asociadas a ese cliente.
-        /// </summary>
-        /// <param name="factura"></param>
-        /// <param name="conexion"></param>
+                    var comando = new SqlCommand("SELECT * FROM Facturas WHERE Id = @Id", conexion);
+                    comando.Parameters.AddWithValue("@Id" ,id);
+
+                    using(var leer = comando.ExecuteReader()) {
+
+                        leer.Read();
+
+                        resultado.Id         = Convert.ToInt32(leer["Id"]);
+                        resultado.Id_Cliente = Convert.ToInt32(leer["Id_Cliente"]);
+                        resultado.Iva        = Convert.ToDecimal(leer["IVA"]);
+                        resultado.SubTotal   = Convert.ToDecimal(leer["SubTotal"]);
+                        resultado.Total      = Convert.ToDecimal(leer["Total"]);
+                    }
+
+                    SeleccionarCliente(resultado ,conexion);
+                    SeleccionarDetalleDeFactura(resultado ,conexion);
+                }
+
+            }
+            catch(Exception) { Console.WriteLine("No se ha encontrado ese registo"); }
+
+            return resultado;
+
+
+        }
+
+        //CRUD Y GENERADORES---
+
+        public  void Crear(Factura modeloDeFactura)
+        {
+            PrepararOrden(modeloDeFactura);
+
+            using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+                conexion.Open();
+
+                AgregarCabeceraFactura(modeloDeFactura ,conexion);
+                AgregarDetalleFactura(modeloDeFactura ,conexion);
+            }
+        }
+        private void AgregarCabeceraFactura(Factura modeloDeFactura ,SqlConnection conexion)
+        {
+            //https://www.munisso.com/2012/06/07/4-ways-to-get-identity-ids-of-inserted-rows-in-sql-server/
+            //https://docs.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql?view=sql-server-ver15
+
+            var consulta = "INSERT INTO Facturas(Id_cliente, IVA , SubTotal ,Total) OUTPUT INSERTED.ID values(@Id_cliente, @IVA , @SubTotal ,@Total)";
+            var comando  = new SqlCommand(consulta,conexion);
+
+            comando.Parameters.AddWithValue("@Id_cliente" ,modeloDeFactura.Id_Cliente);
+            comando.Parameters.AddWithValue("@IVA" ,modeloDeFactura.Iva);
+            comando.Parameters.AddWithValue("@SubTotal" ,modeloDeFactura.SubTotal);
+            comando.Parameters.AddWithValue("@Total" ,modeloDeFactura.Total);
+
+            modeloDeFactura.Id = ( int ) comando.ExecuteScalar();
+
+
+
+        }
+        private void AgregarDetalleFactura(Factura modeloDeFactura ,SqlConnection conexion)
+        {
+            foreach(var detalle in modeloDeFactura.Detalle) {
+
+                var consulta = "INSERT INTO FacturasDetalle(Id_Factura,Id_Producto, Cantidad,Precio,IVA,SubTotal,Total) " +
+                    "values(@Id_Factura,@Id_Producto, @Cantidad,@Precio,@IVA,@SubTotal,@Total)";
+                var comando  = new SqlCommand(consulta,conexion);
+
+                comando.Parameters.AddWithValue("@Id_Factura" ,modeloDeFactura.Id);
+                comando.Parameters.AddWithValue("@Id_Producto" ,detalle.Id_Producto);
+                comando.Parameters.AddWithValue("@Cantidad" ,detalle.Cantidad);
+                comando.Parameters.AddWithValue("@Precio" ,detalle.Precio);
+                comando.Parameters.AddWithValue("@IVA" ,detalle.IVA);
+                comando.Parameters.AddWithValue("@SubTotal" ,detalle.SubTotal);
+                comando.Parameters.AddWithValue("@Total" ,detalle.Total);
+
+                comando.ExecuteNonQuery();
+            }
+
+
+
+        }
+
+        public void Actualizar(Factura modeloDeFactura)
+        {
+            PrepararOrden(modeloDeFactura);
+
+            using(var conexion = new SqlConnection(Parametros.CadenaDeConexion)) {
+                conexion.Open();
+
+                ActualizarCabeceraFactura(modeloDeFactura ,conexion);
+                EliminarDetalleFactura(modeloDeFactura.Id ,conexion);
+            }
+        }
+        private void ActualizarCabeceraFactura(Factura modeloDeFactura ,SqlConnection conexion)
+        {
+            
+            var consulta = "UPDATE Facturas SET Id_cliente = @Id_cliente, IVA = @IVA, SubTotal = @SubTotal ,Total = @Total WHERE Id = @Id";
+            var comando  = new SqlCommand(consulta,conexion);
+
+            comando.Parameters.AddWithValue("@Id"         ,modeloDeFactura.Id);
+            comando.Parameters.AddWithValue("@Id_cliente" ,modeloDeFactura.Id_Cliente);
+            comando.Parameters.AddWithValue("@IVA"        ,modeloDeFactura.Iva);
+            comando.Parameters.AddWithValue("@SubTotal"   ,modeloDeFactura.SubTotal);
+            comando.Parameters.AddWithValue("@Total"      ,modeloDeFactura.Total);
+
+            comando.ExecuteNonQuery();
+
+
+
+        }
+        private void EliminarDetalleFactura(int Id_Factura, SqlConnection conexion)
+        {
+           
+
+                var consulta = "DELETE FROM FacturasDetalle WHERE Id_factura = @Id_Factura";
+                var comando  = new SqlCommand(consulta,conexion);
+
+                comando.Parameters.AddWithValue("@Id_Factura" ,Id_Factura);
+                
+                comando.ExecuteNonQuery();
+           
+
+
+        }
+
+
+
+
+
+        private void PrepararOrden(Factura modeloDeFactura)
+        {
+            foreach(var detalle in modeloDeFactura.Detalle) {
+                detalle.Total    = detalle.Cantidad * detalle.Precio;
+                detalle.IVA      = detalle.Total * Parametros.ImpuestoValorAgregadoArgentina;
+                detalle.SubTotal = detalle.Total - detalle.IVA;
+            }
+            //LinQ
+            modeloDeFactura.Total    = modeloDeFactura.Detalle.Sum(x => x.Total);
+            modeloDeFactura.Iva      = modeloDeFactura.Detalle.Sum(x => x.IVA);
+            modeloDeFactura.SubTotal = modeloDeFactura.Detalle.Sum(x => x.SubTotal);
+        }
+
+
+
+
+
+
+
+        //SELECCIONAR---
+        
         private void SeleccionarCliente( Factura factura, SqlConnection conexion)
         {            
             var comando = new SqlCommand("SELECT * FROM Clientes WHERE Id = @Id_Cliente", conexion);
@@ -85,13 +230,7 @@ namespace Servicios
             }           
             
         }
-
-        /// <summary>
-        /// Seleccionar Cliente para pasar a Lista General de Facturaciones
-        /// </summary>
-        /// <param name="factura"></param>
-        /// <param name="conexion"></param>
-
+        
         private void SeleccionarDetalleDeFactura(Factura factura, SqlConnection conexion)
         {
             var comando = new SqlCommand("SELECT * FROM FacturasDetalle WHERE Id_Factura = @Id_Factura", conexion);
@@ -125,11 +264,7 @@ namespace Servicios
                 }
 
         }
-        /// <summary>
-        /// Seleccionar Producto para pasar a Detalle de factura
-        /// </summary>
-        /// <param name="detalle"></param>
-        /// <param name="conexion"></param>
+        
         private void SeleccionarProducto ( FacturaDetalle detalle , SqlConnection conexion )
             {
             var comando = new SqlCommand("SELECT * FROM Productos WHERE Id = @Id_producto", conexion);
@@ -142,22 +277,12 @@ namespace Servicios
                     {
                     Id     = Convert.ToInt32(leer["Id"]) ,
                     Nombre = leer["Nombre"].ToString() ,
-                    Precio = Convert.ToInt32(leer["Precio"])
+                    Precio = Convert.ToDecimal(leer["Precio"])
                     };
                 }
             }
-    }
-}
 
-
-                                            
-                    });
-                };
-
-                
-            }
-
-        }
+        
     }
 }
 

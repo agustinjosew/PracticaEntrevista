@@ -9,5 +9,6 @@ namespace Comun
                                               + ParamsMaquinaLocal.Usuario
                                               + ParamsMaquinaLocal.password ;
 
+        public const decimal ImpuestoValorAgregadoArgentina = 0.21m;
     }
 }

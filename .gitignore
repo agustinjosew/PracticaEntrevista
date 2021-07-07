@@ -358,3 +358,4 @@ ParamsMaquinaLocal.cs
 *.csv
 *.sdvproj
 
+/.github/workflows/dotnet.yml
