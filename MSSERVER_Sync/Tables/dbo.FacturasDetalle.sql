@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[FacturasDetalle]
 GO
 ALTER TABLE [dbo].[FacturasDetalle] ADD CONSTRAINT [PK_FacturasDetalle] PRIMARY KEY CLUSTERED  ([Id]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[FacturasDetalle] ADD CONSTRAINT [FK_FacturasDetalle_Facturas] FOREIGN KEY ([Id_Factura]) REFERENCES [dbo].[Facturas] ([Id])
+ALTER TABLE [dbo].[FacturasDetalle] ADD CONSTRAINT [FK_FacturasDetalle_Facturas] FOREIGN KEY ([Id_Factura]) REFERENCES [dbo].[Facturas] ([Id]) ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[FacturasDetalle] ADD CONSTRAINT [FK_FacturasDetalle_Productos] FOREIGN KEY ([Id_Producto]) REFERENCES [dbo].[Productos] ([Id])
 GO
